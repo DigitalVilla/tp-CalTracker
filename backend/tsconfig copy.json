@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "outDir": ".build",
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "lib": ["es2020"],
+    "module": "commonjs",
+    "allowJs": true,
+    "rootDir": "./",
+    "declaration": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "preserveConstEnums": true,
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules",
+    ".serverless/**/*",
+    ".webpack/**/*",
+    "**/*.test.ts",
+    "babel.config.js",
+    "prettier.config.js",
+    "webpack.config.js"
+  ]
+}

@@ -1,0 +1,153 @@
+# https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/
+service: cal-tracker
+frameworkVersion: '3'
+
+plugins:
+  - serverless-offline
+  - serverless-webpack
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: ${env:STAGE}
+  region: ${env:AWS_REGION}
+  logRetentionInDays: ${self:custom.logRetention.${self:provider.stage}}
+  memorySize: 256
+  httpApi:
+    cors: true
+  timeout: 10
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - !GetAtt CalsTable.Arn
+            - 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}/index/*'
+
+functions:
+  createUser:
+    handler: src/lambdas/createUser.handler
+    events:
+      - httpApi:
+          path: /users
+          method: post
+  getUser:
+    handler: src/lambdas/getUser.handler
+    events:
+      - httpApi:
+          path: /users
+          method: get
+  login:
+    handler: src/lambdas/login.handler
+    events:
+      - httpApi:
+          path: /users/login
+          method: post
+  logout:
+    handler: src/lambdas/logout.handler
+    events:
+      - httpApi:
+          path: /users/logout
+          method: get
+  getCalories:
+    handler: src/lambdas/getCalories.handler
+    events:
+      - httpApi:
+          path: /users/calories
+          method: get
+  setCalories:
+    handler: src/lambdas/setCalories.handler
+    events:
+      - httpApi:
+          path: /users/calories
+          method: post
+  deleteCalories:
+    handler: src/lambdas/deleteCalories.handler
+    events:
+      - httpApi:
+          path: /users/calories
+          method: delete
+  getUsers:
+    handler: src/lambdas/getUsers.handler
+    events:
+      - httpApi:
+          path: /users/all
+          method: get
+
+resources:
+  Resources:
+    CalsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
+          - AttributeName: GSI2PK
+            AttributeType: S
+          - AttributeName: GSI2SK
+            AttributeType: S
+          - AttributeName: GSI3PK
+            AttributeType: S
+          - AttributeName: GSI3SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: GSI2
+            KeySchema:
+              - AttributeName: GSI2PK
+                KeyType: HASH
+              - AttributeName: GSI2SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: GSI3
+            KeySchema:
+              - AttributeName: GSI3PK
+                KeyType: HASH
+              - AttributeName: GSI3SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+
+package:
+  individually: true
+
+custom:
+  tableName: ${env:TABLE_NAME}-${env:STAGE}
+  logRetention:
+    prod: 90
+    dev: 7
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    packager: 'yarn'
+    excludeFiles: src/**/*.test.js
+    keepOutputDirectory: true
+  serverless-offline:
+    httpPort: 4321
