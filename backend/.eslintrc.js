@@ -12,6 +12,8 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint'],
-  rules: {},
+  plugins: ['@typescript-eslint', 'pettier'],
+  rules: {
+    'prettier/prettier': 'error',
+  },
 }

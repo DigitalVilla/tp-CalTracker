@@ -12,7 +12,7 @@ type ResponseType = {
 }
 
 type ResponseFn = (
-  body?: Record<string, any>,
+  body?: Record<string, any> | string,
   status?: number,
   headers?: Record<string, string | boolean>
 ) => PayloadType
@@ -25,7 +25,8 @@ type PayloadType = {
 
 export const response: ResponseType = {
   success: (body, status = 200, headers = {}) => {
-    const response = !body ? { message: 'success' } : body
+    const response =
+      typeof body === 'object' ? body : { message: body || 'success' }
     return {
       statusCode: status,
       headers: { ...defaultHeaders, ...headers },
@@ -33,15 +34,15 @@ export const response: ResponseType = {
     }
   },
 
-  error: (error = {}, status, headers = {}) => {
+  error: (error, status, headers = {}) => {
     console.log('Error', error)
+    const message =
+      typeof error === 'object' ? error?.message : error || 'Unknown error'
+    const code = typeof error === 'object' ? error?.statusCode : status || 500
     return {
-      statusCode: status || error.statusCode || 500,
+      statusCode: code,
       headers: { ...defaultHeaders, ...headers },
-      body: JSON.stringify({
-        error: error.name || 'Exception',
-        message: error.message || 'Unknown error',
-      }),
+      body: JSON.stringify({ message }),
     }
   },
 }

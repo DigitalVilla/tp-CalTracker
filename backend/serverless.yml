@@ -1,5 +1,5 @@
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/
-service: cal-tracker
+service: tracker
 frameworkVersion: '3'
 
 plugins:
@@ -32,54 +32,106 @@ provider:
             - 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}/index/*'
 
 functions:
-  createUser:
-    handler: src/lambdas/createUser.handler
+# USERS 
+  setUser:
+    handler: src/lambdas/user/setUser.handler
     events:
       - httpApi:
           path: /users
           method: post
   getUser:
-    handler: src/lambdas/getUser.handler
+    handler: src/lambdas/user/getUser.handler
     events:
       - httpApi:
           path: /users
           method: get
+  updateUser:
+    handler: src/lambdas/user/updateUser.handler
+    events:
+      - httpApi:
+          path: /users
+          method: put
+  deleteUser:
+    handler: src/lambdas/user/deleteUser.handler
+    events:
+      - httpApi:
+          path: /users
+          method: delete
+# ENTRIES 
+  setEntry:
+    handler: src/lambdas/entry/setEntry.handler
+    events:
+      - httpApi:
+          path: /users/entries
+          method: post
+  getEntry:
+    handler: src/lambdas/entry/getEntry.handler
+    events:
+      - httpApi:
+          path: /users/entries
+          method: get
+  updateEntry:
+    handler: src/lambdas/entry/updateEntry.handler
+    events:
+      - httpApi:
+          path: /users/entries
+          method: put
+  deleteEntry:
+    handler: src/lambdas/entry/deleteEntry.handler
+    events:
+      - httpApi:
+          path: /users/entries
+          method: delete
+# REPORTS 
+  setReport:
+    handler: src/lambdas/report/setReport.handler
+    events:
+      - httpApi:
+          path: /users/reports
+          method: post
+  getReport:
+    handler: src/lambdas/report/getReport.handler
+    events:
+      - httpApi:
+          path: /users/reports
+          method: get
+  updateReport:
+    handler: src/lambdas/report/updateReport.handler
+    events:
+      - httpApi:
+          path: /users/reports
+          method: put
+  deleteReport:
+    handler: src/lambdas/report/deleteReport.handler
+    events:
+      - httpApi:
+          path: /users/reports
+          method: delete
+# AUTH
   login:
-    handler: src/lambdas/login.handler
+    handler: src/lambdas/auth/login.handler
     events:
       - httpApi:
           path: /users/login
           method: post
   logout:
-    handler: src/lambdas/logout.handler
+    handler: src/lambdas/auth/logout.handler
     events:
       - httpApi:
           path: /users/logout
           method: get
-  getCalories:
-    handler: src/lambdas/getCalories.handler
+  signup:
+    handler: src/lambdas/auth/signup.handler
     events:
       - httpApi:
-          path: /users/calories
-          method: get
-  setCalories:
-    handler: src/lambdas/setCalories.handler
-    events:
-      - httpApi:
-          path: /users/calories
+          path: /users/signup
           method: post
-  deleteCalories:
-    handler: src/lambdas/deleteCalories.handler
+  changePassword:
+    handler: src/lambdas/auth/changePassword.handler
     events:
       - httpApi:
-          path: /users/calories
-          method: delete
-  getUsers:
-    handler: src/lambdas/getUsers.handler
-    events:
-      - httpApi:
-          path: /users/all
-          method: get
+          path: /users/change-password
+          method: put
 
 resources:
   Resources:
@@ -96,14 +148,6 @@ resources:
             AttributeType: S
           - AttributeName: GSI1SK
             AttributeType: S
-          - AttributeName: GSI2PK
-            AttributeType: S
-          - AttributeName: GSI2SK
-            AttributeType: S
-          - AttributeName: GSI3PK
-            AttributeType: S
-          - AttributeName: GSI3SK
-            AttributeType: S
         KeySchema:
           - AttributeName: PK
             KeyType: HASH
@@ -118,22 +162,6 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-          - IndexName: GSI2
-            KeySchema:
-              - AttributeName: GSI2PK
-                KeyType: HASH
-              - AttributeName: GSI2SK
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-          - IndexName: GSI3
-            KeySchema:
-              - AttributeName: GSI3PK
-                KeyType: HASH
-              - AttributeName: GSI3SK
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
 
 package:
@@ -143,6 +171,7 @@ custom:
   tableName: ${env:TABLE_NAME}-${env:STAGE}
   logRetention:
     prod: 90
+    local: 1
     dev: 7
   webpack:
     webpackConfig: 'webpack.config.js'
