@@ -7,7 +7,7 @@ import { nanoid } from 'nanoid'
 export async function setUser({
   password,
   email,
-  role = 0,
+  ...rest
 }: Record<string, any>): Promise<boolean> {
   const Email = email.toLowerCase()
   const modelKey = `user#${Email}`
@@ -18,12 +18,12 @@ export async function setUser({
     Id: nanoid(),
     Password: hashValue(password),
     CreatedAt: setTimeStamp(),
-    Role: role,
-    Username: '',
-    Age: 0,
+    Role: Number(rest.role) || 0,
+    Username: rest.username || '',
+    Age: Number(rest.age) || 0,
     Email,
-    Budget: Number(process.env.DEFAULT_BUDGET),
-    MaxCals: Number(process.env.DEFAULT_MAX_CALS),
+    Budget: rest.budget || Number(process.env.DEFAULT_BUDGET),
+    MaxCals: rest.maxCals || Number(process.env.DEFAULT_MAX_CALS),
     GSI1PK: modelKey,
     GSI1SK: modelKey,
   }

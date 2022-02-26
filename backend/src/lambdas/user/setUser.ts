@@ -13,14 +13,14 @@ export async function handler(
     console.log(event)
     await withAuth(event, minAuth)
 
-    const { email, password, role = 0 } = JSON.parse(event.body || '{}')
+    const { email, password, ...rest } = JSON.parse(event.body || '{}')
     if (!email) return response.error('Missing Email', 400)
     if (!password) return response.error('Missing Password', 400)
 
     isValid.email({ value: email })
     isValid.password({ value: password })
 
-    const set = await setUser({ email, password, role })
+    const set = await setUser({ email, password, ...rest })
 
     const message = set
       ? `User ${email} was created`
