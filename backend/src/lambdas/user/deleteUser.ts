@@ -1,8 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { deleteUser } from '../../db/deleteUser'
 import { withAuth } from '../../utils/auth'
+import { getEmail } from '../../utils/getQueryParams'
 import { response } from '../../utils/response'
-import { isValid } from '../../utils/validations'
 
 const minAuth = Number(process.env.MIN_AUTH_LEVEL)
 
@@ -15,12 +15,7 @@ export async function handler(
     let email = user.email
 
     // Admin needs query param email
-    if (user.role >= minAuth) {
-      const { email: m } = event.queryStringParameters || {}
-      if (!m) return response.error('Missing `email` query parameter', 400)
-      isValid.email({ value: m })
-      email = m
-    }
+    if (user.role >= minAuth) email = getEmail(event)
 
     // Remove user
     const deleted = await deleteUser(email)
