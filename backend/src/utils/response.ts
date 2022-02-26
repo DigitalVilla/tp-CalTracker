@@ -6,6 +6,37 @@ const defaultHeaders = {
   'Access-Control-Allow-Credentials': true,
 }
 
+export const response: ResponseType = {
+  success: (body, status = 200, headers = {}) => {
+    const response =
+      typeof body === 'object' ? body : { message: body || 'success' }
+    return {
+      statusCode: status,
+      headers: { ...defaultHeaders, ...headers },
+      body: JSON.stringify(response),
+    }
+  },
+
+  error: (error: any, status, headers = {}) => {
+    const message =
+      typeof error === 'object'
+        ? error?.message || error
+        : error || 'Exception error'
+    const code =
+      typeof error === 'object'
+        ? error?.code || error?.statusCode || status || 500
+        : status || 500
+
+    console.log(`${code} Error Response:`, `"${message}"`)
+
+    return {
+      statusCode: code,
+      headers: { ...defaultHeaders, ...headers },
+      body: JSON.stringify({ message }),
+    }
+  },
+}
+
 type ResponseType = {
   success: ResponseFn
   error: ResponseFn
@@ -21,28 +52,4 @@ type PayloadType = {
   statusCode: number
   headers: Record<string, string | boolean>
   body: string
-}
-
-export const response: ResponseType = {
-  success: (body, status = 200, headers = {}) => {
-    const response =
-      typeof body === 'object' ? body : { message: body || 'success' }
-    return {
-      statusCode: status,
-      headers: { ...defaultHeaders, ...headers },
-      body: JSON.stringify(response),
-    }
-  },
-
-  error: (error, status, headers = {}) => {
-    console.log('Error', error)
-    const message =
-      typeof error === 'object' ? error?.message : error || 'Unknown error'
-    const code = typeof error === 'object' ? error?.statusCode : status || 500
-    return {
-      statusCode: code,
-      headers: { ...defaultHeaders, ...headers },
-      body: JSON.stringify({ message }),
-    }
-  },
 }

@@ -22,13 +22,15 @@ export async function withAuth(event: APIGatewayProxyEvent, minLevel = 0) {
     const token = bearerToken.replace('Bearer ', '')
     const decoded: any = verifyToken(token)
 
-    if (decoded.Role < minLevel) {
+    if (decoded.role < minLevel) {
       const err: Record<string, any> = new Error('Unauthorized user')
       err.code = 403
       throw err
     }
+
+    return decoded
   } catch (error: any) {
-    error.code = 403
+    error.code = error.code || 403
     throw error
   }
 }

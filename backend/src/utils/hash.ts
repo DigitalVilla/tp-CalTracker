@@ -12,8 +12,6 @@ export function hashValue(value: string) {
 
 export function verifyToken(token: string) {
   const decoded = verify(token, hashingSecret)
-  if (!decoded) return false
-
   return decoded
 }
 
