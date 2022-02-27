@@ -19,7 +19,7 @@ export async function handler(
 
     const deleted = await deleteUser({ email })
     if (!deleted) return response.error(`User ${email} was not found`, 400)
-    return response.success(`User ${email}  has been deleted`, 201)
+    return response.success(`User ${email} has been deleted`, 201)
   } catch (error: any) {
     return response.error(error)
   }

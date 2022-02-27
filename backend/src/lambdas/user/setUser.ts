@@ -13,7 +13,7 @@ export async function handler(
   try {
     console.log(event)
     // Admin only action
-    await withAuth(event, minAuth)
+    const user = await withAuth(event, minAuth)
 
     const [body, missing] = validateBody({
       required: ['email', 'password'],
@@ -24,7 +24,7 @@ export async function handler(
     const errors = validateUserTypes(body)
     if (errors) return response.error(errors, 400)
 
-    const set = await setUser({ ...body })
+    const set = await setUser({ ...body, createdBy: user.email })
     if (!set) return response.error(`User ${body.email} already exist`, 400)
     return response.success(`User ${body.email} was created`, 201)
   } catch (error: any) {
