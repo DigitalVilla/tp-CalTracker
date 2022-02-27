@@ -95,6 +95,7 @@ function parseValue(value: any) {
   try {
     if (value === 'undefined') return 'undefined'
     if (value === 'null') return 'null'
+    // eslint-disable-next-line prefer-const
     let obj = ''
     eval('obj =' + value)
     return obj
@@ -142,7 +143,7 @@ function initExpression(
           if (bounds) break
         } else if (exp[i] === open) {
           const bracket = exp.indexOf(close, i + 1)
-          let val = exp.substring(i + 1, bracket).trim()
+          const val = exp.substring(i + 1, bracket).trim()
           ExpressionAttributeValues[`:${KEYS.val[KEYS.count]}`] =
             parseValue(val)
           expression += `:${KEYS.val[KEYS.count++]}`

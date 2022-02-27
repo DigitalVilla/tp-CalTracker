@@ -4,6 +4,9 @@ import { createToken, hashValue } from '../../utils/hash'
 import { response } from '../../utils/response'
 import { validateBody } from '../../utils/validateBody'
 import { validateUserTypes } from '../../db/validateUserTypes'
+import { sanitizeUser } from '../../utils/sanitizeUser'
+
+const minAuth = Number(process.env.MIN_AUTH_LEVEL)
 
 /**
  *
@@ -43,8 +46,10 @@ export async function handler(
         role: Item.Role,
         id: Item.Id,
       },
-      '10s'
+      '12h'
     )
+
+    if (Item.Role >= minAuth) payload.user = sanitizeUser(Item)
 
     return response.success(payload, 201)
   } catch (error: any) {

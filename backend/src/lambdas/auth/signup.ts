@@ -3,7 +3,6 @@ import { setUser } from '../../db/setUser'
 import { validateUserTypes } from '../../db/validateUserTypes'
 import { response } from '../../utils/response'
 import { validateBody } from '../../utils/validateBody'
-import { isValid } from '../../utils/validations'
 
 export async function handler(
   event: APIGatewayProxyEvent

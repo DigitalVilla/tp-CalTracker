@@ -26,7 +26,7 @@ export const isValid: Record<string, (opt?: any) => any> = {
       !/^[A-Z0-9-. ]{2,40}$/i.test(value) &&
       value.replace(/[\s-_.]/g, '').length >= 2
     )
-      err.message = `${key} can oly contain these characters: '-' '.' '_'`
+      err.message = `${key} can oly contain these characters: [-, ., _, '] `
 
     if (!throws) return err.message
     throw err
