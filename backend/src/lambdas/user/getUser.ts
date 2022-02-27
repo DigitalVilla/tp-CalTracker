@@ -18,8 +18,7 @@ export async function handler(
     // Admin needs query param email
     if (user.role >= minAuth) email = getEmail(event)
 
-    // Get user from DB
-    const Item = await getUser(email)
+    const Item = await getUser({ email })
     if (!Item) return response.error(`User ${email} was not found`, 404)
     return response.success(sanitizeUser(Item, user.role >= minAuth), 200)
   } catch (error: any) {

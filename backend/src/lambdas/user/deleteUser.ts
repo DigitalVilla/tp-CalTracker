@@ -17,14 +17,9 @@ export async function handler(
     // Admin needs query param email
     if (user.role >= minAuth) email = getEmail(event)
 
-    // Remove user
-    const deleted = await deleteUser(email)
-
-    const message = deleted
-      ? `User ${email} has been deleted`
-      : `User ${email} was not found`
-
-    return response.success({ message }, deleted ? 200 : 404)
+    const deleted = await deleteUser({ email })
+    if (!deleted) return response.error(`User ${email} was not found`, 400)
+    return response.success(`User ${email}  has been deleted`, 201)
   } catch (error: any) {
     return response.error(error)
   }

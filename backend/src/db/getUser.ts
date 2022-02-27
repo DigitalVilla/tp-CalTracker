@@ -1,7 +1,7 @@
 import { GetCommand, GetCommandInput } from '@aws-sdk/lib-dynamodb'
 import { client, TableName } from '../utils/clientDB'
 
-export async function getUser(email: string): Promise<any> {
+export async function getUser({ email }: Record<string, any>): Promise<any> {
   try {
     const Email = email.toLowerCase()
     const modelKey = `user#${Email}`

@@ -22,6 +22,7 @@ export async function setUser({
     Username: rest.username || '',
     Age: Number(rest.age) || 0,
     Email,
+    Verified: rest.verified || false,
     Budget: rest.budget || Number(process.env.DEFAULT_BUDGET),
     MaxCals: rest.maxCals || Number(process.env.DEFAULT_MAX_CALS),
     GSI1PK: modelKey,

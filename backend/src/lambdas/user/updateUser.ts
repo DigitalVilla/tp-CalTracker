@@ -1,9 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { validateUserTypes } from '../../db/validateUserTypes'
 import { updateUser } from '../../db/updateUser'
 import { withAuth } from '../../utils/auth'
 import { getEmail } from '../../utils/getQueryParams'
 import { hashValue } from '../../utils/hash'
 import { response } from '../../utils/response'
+import { validateBody } from '../../utils/validateBody'
 import { isValid } from '../../utils/validations'
 
 const minAuth = Number(process.env.MIN_AUTH_LEVEL)
@@ -12,62 +14,33 @@ export async function handler(
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
   try {
-    // console.log(event)
+    console.log(event)
     const user = await withAuth(event)
     let email = user.email
 
     // Admin needs query param email
     if (user.role >= minAuth) email = getEmail(event)
 
-    const { username, maxCals, budget, age, password, role } = JSON.parse(
-      event.body || '{}'
-    )
-    const errors = [
-      maxCals &&
-        isValid.number({
-          value: maxCals,
-          range: [500, 5000],
-          key: 'maxCals',
-          silent: true,
-        }),
-      budget &&
-        isValid.number({
-          value: budget,
-          range: [500, 10000],
-          key: 'budget',
-          silent: true,
-        }),
-      age &&
-        isValid.number({
-          value: age,
-          range: [12, 120],
-          key: 'age',
-          silent: true,
-        }),
-      username && isValid.username({ value: username, silent: true }),
-      password && isValid.password({ value: password, silent: true }),
-    ].filter((d) => d)
-
-    if (errors.length) return response.error(errors, 400)
+    const [body] = validateBody({ event })
+    const errors = validateUserTypes(body)
+    if (errors) return response.error(errors, 400)
 
     let exp = `SET #Id = (${user.id})`
+    if (body.password) exp += `, #Password = (${hashValue(body.password)})`
+    if (body.username) exp += `, #Username = (${body.username})`
+    if (body.verified) exp += `, #Verified = (${body.verified})`
+    if (body.maxCals) exp += `, #MaxCals = (${body.maxCals})`
+    if (body.budget) exp += `, #Budget = (${body.budget})`
+    if (body.age) exp += `, #Age = (${body.age})`
 
-    if (password) exp += `, #Password = (${hashValue(password)})`
-    if (username) exp += `, #Username = (${username})`
-    if (maxCals) exp += `, #MaxCals = (${maxCals})`
-    if (budget) exp += `, #Budget = (${budget})`
-    if (age) exp += `, #Age = (${age})`
-
-    if (user.role >= minAuth && role) {
-      isValid.number({ value: role, range: [0, 4], key: 'role' })
-      exp += `, #Role = (${role})`
+    if (user.role >= minAuth && body.role) {
+      isValid.number({ value: body.role, range: [0, 4], key: 'role' })
+      exp += `, #Role = (${body.role})`
     }
 
-    const updated = await updateUser(email, exp)
-    const message = updated
-      ? `User ${email} has been updated`
-      : `User ${email} was not found`
-    return response.success({ message }, updated ? 200 : 404)
+    const updated = await updateUser({ email, expression: exp })
+    if (!updated) return response.error(`User ${body.email} was not found`, 400)
+    return response.success(`User ${body.email} has been updated`, 201)
   } catch (error: any) {
     return response.error(error)
   }

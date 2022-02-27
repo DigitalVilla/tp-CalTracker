@@ -2,10 +2,10 @@ import { UpdateCommand, UpdateCommandInput } from '@aws-sdk/lib-dynamodb'
 import { client, TableName } from '../utils/clientDB'
 import { parseExpression } from '../utils/parseExpression'
 
-export async function updateUser(
-  email: string,
-  UpdateExpression: string
-): Promise<boolean> {
+export async function updateUser({
+  email,
+  UpdateExpression,
+}: Record<string, any>): Promise<boolean> {
   try {
     const Email = email.toLowerCase()
     const modelKey = `user#${Email}`

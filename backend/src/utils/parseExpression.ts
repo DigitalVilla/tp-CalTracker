@@ -1,3 +1,46 @@
+/* Use Examples
+
+ // Default: parses all values wrapped by delimiter "(""
+  parseExpression({
+    ConditionExpression: '#balance > (5000)',
+    UpdateExpression: 'SET #balance = #balance - (1200)',
+  })
+
+ // Custom 1: parse values wrapped by new delimiter "{"
+  parseExpression({
+    KeyConditionExpression: '#IsActive = {true}',
+    FilterExpression: '#Genre = {Family}',
+    }.
+    {defaultDelimiter : "{" }
+  )
+
+  // Custom 2: parse values wrapped by new delimiter "$" and per expression 
+  parseExpression(
+    {
+      ConditionExpression: {
+        expression: '#balance > {1234} and attribute_not_exists(SK)',
+        delimiter: '{',
+      },
+      UpdateExpression: 'SET #balance = #balance - ${"value": false}$',
+      FilterExpression: '#Rating > $3$',
+    },
+    { delimiter: '$' }
+  )
+)
+
+  // Custom 3: Skip parsing a single expression 
+  parseExpression(
+    {
+      UpdateExpression: 'SET #Name = (Omar)',
+      ConditionExpression: {
+        expression: 'attribute_exists(Email) and attribute_not_exists(Name) ',
+        delimiter: null,
+      },
+    },
+  )
+)
+*/
+
 export function parseExpression(
   {
     KeyConditionExpression,

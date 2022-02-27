@@ -1,7 +1,9 @@
 import { DeleteCommand, DeleteCommandInput } from '@aws-sdk/lib-dynamodb'
 import { client, TableName } from '../utils/clientDB'
 
-export async function deleteUser(email: string): Promise<boolean> {
+export async function deleteUser({
+  email,
+}: Record<string, any>): Promise<boolean> {
   try {
     const Email = email.toLowerCase()
     const modelKey = `user#${Email}`
