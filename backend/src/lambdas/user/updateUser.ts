@@ -38,9 +38,9 @@ export async function handler(
       exp += `, #Role = (${body.role})`
     }
 
-    const updated = await updateUser({ email, expression: exp })
-    if (!updated) return response.error(`User ${body.email} was not found`, 400)
-    return response.success(`User ${body.email} has been updated`, 201)
+    const updated = await updateUser({ email, UpdateExpression: exp })
+    if (!updated) return response.error(`User ${email} was not found`, 400)
+    return response.success(`User ${email} has been updated`, 201)
   } catch (error: any) {
     return response.error(error)
   }

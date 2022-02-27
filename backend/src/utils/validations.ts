@@ -1,23 +1,33 @@
 export const isValid: Record<string, (opt?: any) => any> = {
-  fullName: ({ value, throws = false }) => {
-    if (
-      /^[A-Z-. ]{2,40}$/i.test(value) &&
+  fullName: ({ value, key = 'fullName', max = 60, throws = false }) => {
+    const err: Record<string, any> = new Error()
+    err.code = 400
+
+    if (typeof value !== 'string') err.message = `${key} should be a string`
+    else if (value.length > max)
+      err.message = `${key} is larger than ${max} characters`
+    else if (
+      !/^[A-Z-. ]{2,60}$/i.test(value) &&
       value.replace(/[\s-.]/g, '').length >= 4
     )
-      return
-    const err: Record<string, any> = new Error('enter a valid name')
-    err.code = 400
+      err.message = `${key} can oly contain these characters: '-' '.'`
+
     if (!throws) return err.message
     throw err
   },
-  username: ({ value, throws = false }) => {
-    if (
-      /^[A-Z0-9-. ]{2,40}$/i.test(value) &&
-      value.replace(/[\s-.]/g, '').length >= 2
-    )
-      return
-    const err: Record<string, any> = new Error('enter a valid username')
+  username: ({ value, max = 40, key = 'username', throws = false }) => {
+    const err: Record<string, any> = new Error()
     err.code = 400
+
+    if (typeof value !== 'string') err.message = `${key} should be a string`
+    else if (value.length > max)
+      err.message = `${key} is larger than ${max} characters`
+    else if (
+      !/^[A-Z0-9-. ]{2,40}$/i.test(value) &&
+      value.replace(/[\s-_.]/g, '').length >= 2
+    )
+      err.message = `${key} can oly contain these characters: '-' '.' '_'`
+
     if (!throws) return err.message
     throw err
   },
@@ -29,15 +39,18 @@ export const isValid: Record<string, (opt?: any) => any> = {
     if (!throws) return err.message
     throw err
   },
-  email: ({ value, throws = false }) => {
-    if (
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i.test(
+  email: ({ value, key = 'email', max = 120, throws = false }) => {
+    const err: Record<string, any> = new Error()
+    err.code = 400
+    if (typeof value !== 'string') err.message = `${key} should be a string`
+    else if (value.length > max)
+      err.message = `${key} is larger than ${max} characters`
+    else if (
+      !/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i.test(
         value
       )
     )
-      return
-    const err: Record<string, any> = new Error('enter a valid email')
-    err.code = 400
+      err.message = `${key} should be in a valid format`
     if (!throws) return err.message
     throw err
   },
@@ -56,15 +69,26 @@ export const isValid: Record<string, (opt?: any) => any> = {
     if (!throws) return err.message
     throw err
   },
-  password: ({ value, throws = false }) => {
+  password: ({
+    value,
+    key = 'password',
+    max = 60,
+    min = 8,
+    throws = false,
+  }) => {
     const err: Record<string, any> = new Error()
     err.code = 400
-    if (value.length < 8) err.message = 'password is less than 8 characters'
+
+    if (typeof value !== 'string') err.message = `${key} should be a string`
+    else if (value.length > max)
+      err.message = `${key} is larger than ${max} characters`
+    else if (value.length < min)
+      err.message = `${key} is shorter than ${min} characters`
     else if (!/[A-Z]/.test(value))
-      err.message = 'password missing Uppercase letters'
+      err.message = `${key} should have uppercase letters`
     else if (!/[a-z]/.test(value))
-      err.message = 'password missing Lowercase letters'
-    else if (!/[0-9]/.test(value)) err.message = 'password missing Numbers'
+      err.message = `${key} should have lowercase letters`
+    else if (!/[0-9]/.test(value)) err.message = `${key} should have numbers`
     if (err.message && !throws) return err.message
     if (err.message) throw err
   },

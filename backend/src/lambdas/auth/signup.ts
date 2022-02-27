@@ -1,6 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { setUser } from '../../db/setUser'
+import { validateUserTypes } from '../../db/validateUserTypes'
 import { response } from '../../utils/response'
+import { validateBody } from '../../utils/validateBody'
 import { isValid } from '../../utils/validations'
 
 export async function handler(
@@ -8,30 +10,26 @@ export async function handler(
 ): Promise<APIGatewayProxyResult> {
   try {
     console.log(event)
+    const [body, missing] = validateBody({
+      required: ['email', 'password'],
+      event,
+    })
+    if (missing.length) return response.error(missing, 400)
 
-    const { email, password, username, age, budget, maxCals } = JSON.parse(
-      event.body || '{}'
-    )
-    if (!email) return response.error('Missing Email', 400)
-    if (!password) return response.error('Missing Password', 400)
-
-    isValid.email({ value: email })
-    isValid.password({ value: password })
+    const errors = validateUserTypes(body)
+    if (errors) return response.error(errors, 400)
 
     const set = await setUser({
-      email,
-      password,
-      username,
-      budget,
-      maxCals,
-      age,
+      email: body.email,
+      password: body.password,
+      username: body.username,
+      budget: body.budget,
+      maxCals: body.maxCals,
+      age: body.age,
     })
 
-    const message = set
-      ? `User ${email} was created`
-      : `User ${email} already exist`
-
-    return response.success(message, set ? 201 : 400)
+    if (!set) return response.error(`User ${body.email} already exist`, 400)
+    return response.success(`User ${body.email} was created`, 201)
   } catch (error: any) {
     return response.error(error)
   }
