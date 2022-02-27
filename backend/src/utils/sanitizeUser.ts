@@ -1,4 +1,4 @@
-export function sanitizeUser(Item: Record<string, any>, isAdmin = false) {
+export function sanitizeUser(Item: Record<string, any>, hasAuth = false) {
   const user: Record<string, any> = {}
   user.username = Item.Username || Item.Email
   user.email = Item.Email
@@ -6,7 +6,7 @@ export function sanitizeUser(Item: Record<string, any>, isAdmin = false) {
   user.budget = Item.Budget
   user.age = Item.Age
 
-  if (isAdmin) {
+  if (hasAuth) {
     user.email = Item.Email
     user.createdAt = Item.CreatedAt
     user.maxCals = Item.MaxCals
